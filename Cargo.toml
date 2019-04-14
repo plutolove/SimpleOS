@@ -1,0 +1,18 @@
+[package]
+name = "SimpleOS"
+version = "0.1.0"
+authors = ["plutolove <sa517255@mail.ustc.edu.cn>"]
+edition = "2018"
+
+[profile.dev]
+panic = "abort" # 禁用panic时栈展开
+
+# 使用`cargo build --release`编译时需要的配置
+[profile.release]
+panic = "abort" # 禁用panic时栈展开
+
+[dependencies]
+bootloader = "0.5.1"
+
+[package.metadata.bootimage]
+default-target = "x86_64_os.json"
