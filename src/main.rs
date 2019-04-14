@@ -13,8 +13,15 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    let mut w = Writer::new(Color::Green, Color::Black);
+    let mut w = Writer::new(Color::Cyan, Color::Black);
+
     w.write_string("Hello\nWorld!\n");
-    w.write_string("sdfgwrdfgdfghdfgh");
+    //w.write_string("sdfgwrdfgdfghdfgh\n");
+
+    for i in 65..100 {
+        w.write_byte(i);
+        w.write_string("\n");
+    }
+
     loop {}
 }
