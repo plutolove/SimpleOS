@@ -1,3 +1,5 @@
+use core::ptr;
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -18,6 +20,12 @@ pub enum Color {
     Pink = 13,
     Yellow = 14,
     White = 15,
+}
+
+impl Color {
+    pub fn GenColorCode(f: Color, b: Color) -> u8 {
+        return ((b as u8) << 4) | (f as u8);
+    }
 }
 
 struct Char {
@@ -41,17 +49,13 @@ pub struct Writer {
     buffer: &'static mut Buffer,
 }
 
-pub fn genColorCode(f: Color, b: Color) -> u8 {
-    return (((b as u8) << 4) | (f as u8));
-}
-
 impl Writer {
 
     pub fn new(front: Color, back: Color) -> Self {
         Self {
             col: 0,
             raw: 0,
-            color_code: genColorCode(Color::Green, Color::Black),
+            color_code: Color::GenColorCode(Color::Green, Color::Black),
             buffer: unsafe {&mut *(0xb8000 as *mut Buffer)},
         }
     }
@@ -72,7 +76,10 @@ impl Writer {
         match byte {
             b'\n' => self.new_line(),
             _ => {
-                self.buffer.chars[self.raw][self.col] = Char{color_code: self.color_code, ch: byte};
+                let mut p = (&mut self.buffer.chars[self.raw][self.col]) as *mut Char;
+                unsafe {
+                    ptr::write_volatile(p, Char{color_code: self.color_code, ch: byte});
+                }
                 self.next();
             }
         }

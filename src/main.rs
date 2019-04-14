@@ -3,7 +3,7 @@
 
 mod vga;
 
-use vga::{Writer, Color, genColorCode, Buffer};
+use vga::{Writer, Color, Buffer};
 use core::panic::PanicInfo;
 
 #[panic_handler]
@@ -14,7 +14,7 @@ fn panic(_info: &PanicInfo) -> ! {
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     let mut w = Writer::new(Color::Green, Color::Black);
-    w.write_string("Hello World!\n");
+    w.write_string("Hello\nWorld!\n");
     w.write_string("sdfgwrdfgdfghdfgh");
     loop {}
 }
