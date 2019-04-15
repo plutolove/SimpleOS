@@ -1,11 +1,27 @@
 use core::ptr;
-use core::sync::atomic::AtomicPtr;
-use core::cell::Cell;
+use core::fmt;
+use crate::spin::Mutex;
 
 use lazy_static::lazy_static;
 
-lazy_static!{
-    pub static ref WRITER: AtomicPtr<Writer> = AtomicPtr::new(Cell::new(Writer::new(Color::Cyan, Color::Black)).as_ptr());
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer::new(Color::Cyan, Color::Black));
+}
+
+pub fn _print(args: fmt::Arguments) {
+    use core::fmt::Write;
+    WRITER.lock().write_fmt(args).unwrap();
+}
+
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::vga::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
 }
 
 #[allow(dead_code)]
@@ -31,7 +47,7 @@ pub enum Color {
 }
 
 impl Color {
-    pub fn GenColorCode(f: Color, b: Color) -> u8 {
+    pub fn gen_color_code(f: Color, b: Color) -> u8 {
         return ((b as u8) << 4) | (f as u8);
     }
 }
@@ -58,12 +74,19 @@ pub struct Writer {
     buffer: &'static mut Buffer,
 }
 
+impl fmt::Write for Writer {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.write_string(s);
+        Ok(())
+    }
+}
+
 impl Writer {
 
     pub fn new(front: Color, back: Color) -> Self {
         Self {
             col: 0,
-            color_code: Color::GenColorCode(front, back),
+            color_code: Color::gen_color_code(front, back),
             buffer: unsafe {&mut *(0xb8000 as *mut Buffer)},
         }
     }
@@ -99,7 +122,7 @@ impl Writer {
     }
 
     fn write_volatile(&mut self, x: usize, y: usize, ch: Char) {
-        let mut p = (&mut self.buffer.chars[x][y]) as *mut Char;
+        let p = (&mut self.buffer.chars[x][y]) as *mut Char;
         unsafe {
             ptr::write_volatile(p, ch);
         }
@@ -126,7 +149,5 @@ impl Writer {
                 _ => self.write_byte(0xfe),
             }
         }
-        //pub static WRITER: AtomicPtr<Writer> = AtomicPtr::new(Cell::new(Writer::new(Color::Cyan, Color::Black)).as_ptr());
-
     }
 }
