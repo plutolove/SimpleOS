@@ -46,7 +46,6 @@ pub struct Buffer {
 
 pub struct Writer {
     col: usize,
-    raw: usize,
     color_code: u8,
     buffer: &'static mut Buffer,
 }
@@ -56,7 +55,6 @@ impl Writer {
     pub fn new(front: Color, back: Color) -> Self {
         Self {
             col: 0,
-            raw: 0,
             color_code: Color::GenColorCode(front, back),
             buffer: unsafe {&mut *(0xb8000 as *mut Buffer)},
         }
@@ -69,37 +67,19 @@ impl Writer {
         };
         for col in 0..N {
             self.write_volatile(raw, col, blank);
-            //self.buffer.chars[row][col].write(blank);
         }
     }
 
     fn new_line(&mut self) {
-        //self.raw = (self.raw + 1) % M;
-        self.raw += 1;
-        self.roll();
+        for i in 1..M {
+            for j in 0..N {
+                self.write_volatile(i-1, j, self.read_volatile(i, j));
+            }
+        }
+        self.clear_raw(M-1);
         self.col = 0;
     }
 
-    fn roll(&mut self) {
-        if self.raw == M {
-            for i in 0..(M - 1) {
-                for j in 0..N {
-                    self.write_volatile(i, j, self.read_volatile(i + 1, j));
-                }
-            }
-            self.clear_raw(M-1);
-            self.raw = M-1;
-        }
-    }
-
-    fn next(&mut self) {
-        self.col = (self.col + 1) % N;
-        if self.col == 0 {
-            //self.raw = (self.raw + 1) % M;
-            self.raw += 1;
-            self.roll();
-        }
-    }
 
     fn read_volatile(&self, x: usize, y: usize) -> Char {
         let p = (&self.buffer.chars[x][y]) as *const Char;
@@ -111,7 +91,7 @@ impl Writer {
     }
 
     fn write_volatile(&mut self, x: usize, y: usize, ch: Char) {
-        let mut p = (&mut self.buffer.chars[self.raw][self.col]) as *mut Char;
+        let mut p = (&mut self.buffer.chars[x][y]) as *mut Char;
         unsafe {
             ptr::write_volatile(p, ch);
         }
@@ -121,8 +101,12 @@ impl Writer {
         match byte {
             b'\n' => self.new_line(),
             _ => {
-                self.write_volatile(self.raw, self.col, Char{color_code: self.color_code, ch: byte});
-                self.next();
+                if self.col >= N {
+                    self.new_line();
+                }
+                let raw = M - 1;
+                self.write_volatile(raw, self.col, Char{color_code: self.color_code, ch: byte});
+                self.col += 1;
             }
         }
     }

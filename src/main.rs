@@ -18,7 +18,7 @@ pub extern "C" fn _start() -> ! {
     w.write_string("Hello\nWorld!\n");
     //w.write_string("sdfgwrdfgdfghdfgh\n");
 
-    for i in 65..100 {
+    for i in 65..91 {
         w.write_byte(i);
         w.write_string("\n");
     }
