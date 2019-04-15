@@ -2,6 +2,7 @@
 #![no_main] // 禁用所有Rust层级的入口点
 
 mod vga;
+mod spin;
 
 use vga::{Writer, Color, Buffer};
 use core::panic::PanicInfo;
@@ -21,6 +22,11 @@ pub extern "C" fn _start() -> ! {
     for i in 65..91 {
         w.write_byte(i);
         w.write_string("\n");
+    }
+
+    //vga::WRITER.write_string("sdfgsrtdgfhdfghdfgh");
+    unsafe {
+        (vga::WRITER.borrow_mut()).write_string("sdfgerdsfgsdfgsdfg");
     }
 
     loop {}

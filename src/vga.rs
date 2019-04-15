@@ -1,4 +1,12 @@
 use core::ptr;
+use core::sync::atomic::AtomicPtr;
+use core::cell::Cell;
+
+use lazy_static::lazy_static;
+
+lazy_static!{
+    pub static ref WRITER: AtomicPtr<Writer> = AtomicPtr::new(Cell::new(Writer::new(Color::Cyan, Color::Black)).as_ptr());
+}
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -118,5 +126,7 @@ impl Writer {
                 _ => self.write_byte(0xfe),
             }
         }
+        //pub static WRITER: AtomicPtr<Writer> = AtomicPtr::new(Cell::new(Writer::new(Color::Cyan, Color::Black)).as_ptr());
+
     }
 }
