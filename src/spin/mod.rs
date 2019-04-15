@@ -75,11 +75,11 @@ unsafe impl<T: ?Sized + Send> Send for Mutex<T> {}
 
 impl <'a, T: ?Sized> Deref for Lock<'a, T> {
     type Target = T;
-    fn deref<'b>(&'b self) -> &'b T { &*self.data }
+    fn deref(&self) -> &T { &*self.data }
 }
 
 impl <'a, T: ?Sized> DerefMut for Lock<'a, T> {
-    fn deref_mut<'b>(&'b mut self) -> &'b mut T { &mut *self.data }
+    fn deref_mut(& mut self) -> &mut T { &mut *self.data }
 }
 
 impl <'a, T: ?Sized> Drop for Lock<'a, T> {
