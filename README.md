@@ -3,7 +3,7 @@
 
 #### 依赖
 ```bash
-rustup override add nightly # 切换rust工具链到nightly
+curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly # 安装nightly工具链
 cargo install cargo-xbuild
 cargo install bootimage --version "^0.7.1"
 rustup component add llvm-tools-preview
