@@ -3,6 +3,7 @@
 
 pub mod spin;
 pub mod vga;
+pub mod interrupt;
 
 use vga::{Writer, Color};
 use core::panic::PanicInfo;
