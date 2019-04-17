@@ -1,6 +1,6 @@
-use core::sync::atomic::{AtomicBool, Ordering, spin_loop_hint};
 use core::cell::UnsafeCell;
-use core::ops::{Drop, Deref, DerefMut};
+use core::ops::{Deref, DerefMut, Drop};
+use core::sync::atomic::{spin_loop_hint, AtomicBool, Ordering};
 
 pub struct Mutex<T: ?Sized> {
     lock: AtomicBool,
@@ -11,7 +11,7 @@ impl<T> Mutex<T> {
     pub const fn new(udata: T) -> Mutex<T> {
         Self {
             lock: AtomicBool::new(false),
-            data: UnsafeCell::new(udata)
+            data: UnsafeCell::new(udata),
         }
     }
 
@@ -19,11 +19,9 @@ impl<T> Mutex<T> {
         let Mutex { data, .. } = self;
         data.into_inner()
     }
-
 }
 
 impl<T: ?Sized> Mutex<T> {
-
     fn get_lock(&self) {
         //lock初始化为false，加锁时设置为true，compare_and_swap函数返回false，结束while循环，加锁成功
         //当lock为true时，则说明有另一个线程持有锁，进入第一个while循环，第二个while循环load结果为true，执行spin_loop_hint，线程忙等
@@ -39,9 +37,7 @@ impl<T: ?Sized> Mutex<T> {
         self.get_lock();
         Lock {
             lock: &self.lock,
-            data: unsafe{
-                &mut *self.data.get()
-            },
+            data: unsafe { &mut *self.data.get() },
         }
     }
 
@@ -51,14 +47,10 @@ impl<T: ?Sized> Mutex<T> {
 
     pub fn try_lock(&self) -> Option<Lock<T>> {
         if !self.lock.compare_and_swap(false, true, Ordering::Acquire) {
-            Some(
-                Lock {
-                    lock: &self.lock,
-                    data: unsafe {
-                        &mut *self.data.get()
-                    }
-                }
-            )
+            Some(Lock {
+                lock: &self.lock,
+                data: unsafe { &mut *self.data.get() },
+            })
         } else {
             None
         }
@@ -73,16 +65,20 @@ pub struct Lock<'a, T: ?Sized + 'a> {
 unsafe impl<T: ?Sized + Send> Sync for Mutex<T> {}
 unsafe impl<T: ?Sized + Send> Send for Mutex<T> {}
 
-impl <'a, T: ?Sized> Deref for Lock<'a, T> {
+impl<'a, T: ?Sized> Deref for Lock<'a, T> {
     type Target = T;
-    fn deref(&self) -> &T { &*self.data }
+    fn deref(&self) -> &T {
+        &*self.data
+    }
 }
 
-impl <'a, T: ?Sized> DerefMut for Lock<'a, T> {
-    fn deref_mut(& mut self) -> &mut T { &mut *self.data }
+impl<'a, T: ?Sized> DerefMut for Lock<'a, T> {
+    fn deref_mut(&mut self) -> &mut T {
+        &mut *self.data
+    }
 }
 
-impl <'a, T: ?Sized> Drop for Lock<'a, T> {
+impl<'a, T: ?Sized> Drop for Lock<'a, T> {
     fn drop(&mut self) {
         self.lock.store(false, Ordering::Release);
     }

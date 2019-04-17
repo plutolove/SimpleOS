@@ -13,6 +13,7 @@ panic = "abort" # 禁用panic时栈展开
 
 [dependencies]
 bootloader = "0.5.1"
+bitflags = "1.0.4"
 
 
 [package.metadata.bootimage]

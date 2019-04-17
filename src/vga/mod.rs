@@ -1,6 +1,6 @@
-use core::ptr;
-use core::fmt;
 use crate::spin::Mutex;
+use core::fmt;
+use core::ptr;
 
 use lazy_static::lazy_static;
 
@@ -62,7 +62,6 @@ struct Char {
 const M: usize = 25;
 const N: usize = 80;
 
-
 #[repr(transparent)]
 pub struct Buffer {
     chars: [[Char; N]; M],
@@ -82,12 +81,11 @@ impl fmt::Write for Writer {
 }
 
 impl Writer {
-
     pub fn new(front: Color, back: Color) -> Self {
         Self {
             col: 0,
             color_code: Color::gen_color_code(front, back),
-            buffer: unsafe {&mut *(0xb8000 as *mut Buffer)},
+            buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
         }
     }
 
@@ -104,13 +102,12 @@ impl Writer {
     fn new_line(&mut self) {
         for i in 1..M {
             for j in 0..N {
-                self.write_volatile(i-1, j, self.read_volatile(i, j));
+                self.write_volatile(i - 1, j, self.read_volatile(i, j));
             }
         }
-        self.clear_raw(M-1);
+        self.clear_raw(M - 1);
         self.col = 0;
     }
-
 
     fn read_volatile(&self, x: usize, y: usize) -> Char {
         let p = (&self.buffer.chars[x][y]) as *const Char;
@@ -136,7 +133,14 @@ impl Writer {
                     self.new_line();
                 }
                 let raw = M - 1;
-                self.write_volatile(raw, self.col, Char{color_code: self.color_code, ch: byte});
+                self.write_volatile(
+                    raw,
+                    self.col,
+                    Char {
+                        color_code: self.color_code,
+                        ch: byte,
+                    },
+                );
                 self.col += 1;
             }
         }

@@ -1,13 +1,15 @@
 #![no_std] // 不链接Rust标准库
 #![no_main] // 禁用所有Rust层级的入口点
 
+pub mod interrupt;
 pub mod spin;
 pub mod vga;
-pub mod interrupt;
 
-use vga::{Writer, Color};
-use core::panic::PanicInfo;
+use bootloader::BootInfo;
+
 use core::fmt::Write;
+use core::panic::PanicInfo;
+use vga::{Color, Writer};
 //use vga::{print, println};
 
 #[panic_handler]
@@ -25,6 +27,7 @@ pub extern "C" fn _start() -> ! {
         w.write_byte(i);
         w.write_string("\n");
     }
+
     vga::WRITER.lock().write_str("Hello again").unwrap();
     print!("sdfgsfgsfg\n");
     println!("sdfgewrdfgsdfgsf {} {} {} {}", 235, 56.4653, 567456, 0.435);
