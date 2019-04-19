@@ -22,20 +22,6 @@ fn panic(_info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    /*
-    let mut w = Writer::new(Color::Cyan, Color::Black);
-    w.write_string("Hello\nWorld!\n");
-    w.write_str("sdfgsdfg");
-    for i in 65..91 {
-        w.write_byte(i);
-        w.write_string("\n");
-    }
-    vga::WRITER.lock().write_str("Hello again").unwrap();
-    print!("sdfgsfgsfg\n");
-    println!("sdfgewrdfgsdfgsf {} {} {} {}", 235, 56.4653, 567456, 0.435);
-    println!("--------------------------------------------");
-    */
-
     init_idt();
     int3();
     loop {}
