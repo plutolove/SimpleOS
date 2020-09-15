@@ -4,6 +4,7 @@
 #### 依赖
 ```bash
 curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly # 安装nightly工具链
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain=nightly
 cargo install cargo-xbuild
 cargo install bootimage --version "^0.7.1"
 rustup component add llvm-tools-preview
